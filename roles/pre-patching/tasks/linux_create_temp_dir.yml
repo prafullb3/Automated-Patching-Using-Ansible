@@ -1,0 +1,55 @@
+---
+- block:
+    - name: check if temp directory is specified or not
+      fail:
+        msg: "variable named 'linux_temp_dir_name' which specify temporary file storage path for patching framework for remote linux machine is not defined" 
+      when: linux_temp_dir_name is not defined
+    - name: Check if evidence_dir is specified or not
+      fail:
+        msg: "variable named 'evidence_dir' which specify evidence storage sub-directory name for remote linux machine is not defined" 
+      when: evidence_dir is not defined
+    - name: "Generate time stamp for file"
+      set_fact:
+        time_stamp: "{{ '%d %b %Y' | strftime(ansible_date_time.epoch) }}"
+        time_stamp_snapshot: "{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-{{ ansible_date_time.day }}-{{ansible_date_time.hour}}:{{ansible_date_time.minute}}"
+    - ansible.builtin.set_fact:
+        linux_temp_dir: "{{linux_temp_dir_name}}_{{ time_stamp_snapshot }}"
+
+    - name: Remove evidence from past (if any)
+      block:
+        - name: Remove evidence directory from past (if any) 
+          file:
+            state: absent
+            path: "{{ linux_temp_dir.rstrip('/') }}"
+        - name: Remove evidence zip from past (if any) 
+          file:
+            state: absent
+            path: "{{ linux_temp_dir.rstrip('/') }}.zip"
+    
+    - name: Create dir with time_stamp
+      file:
+        state: directory
+        path: "{{ linux_temp_dir.rstrip('/') }}"
+    - name: Check if patch directory already exists 
+      stat:
+        path: "{{ linux_temp_dir.rstrip('/') }}"
+      register: patch_dir_exists
+
+    - name: Create new directory for patching framework specific evidence collection, if not already exists 
+      file:
+        state: directory
+        path: "{{ linux_temp_dir.rstrip('/') }}"
+      when: not patch_dir_exists.stat.exists
+  
+  rescue:
+    - name: Trigger notification
+      include_role: 
+        name: post_patching
+        tasks_from: notification.yml
+      vars:
+        mail_subject: "Patching failed at pre patch stage on host: {{inventory_hostname}}"
+        mail_body: "Error in setting up temp directory at path: {{linux_temp_dir.rstrip('/')}}, Please check user permissions"
+
+    - name: Unable to create temp directory
+      fail:
+        msg: "Error while setting up temp directory for patching at task: '{{ ansible_failed_task.name }}' for remote '{{ ansible_facts['os_family']}}' machine " 

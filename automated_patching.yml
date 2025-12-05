@@ -1,0 +1,17 @@
+---
+- name: Install Patching on servers using Ansible
+  hosts: all 
+  become: yes
+  tasks:
+    - name: Include role Pre-Patching
+      include_role:
+        name: Pre-Patching
+    
+    - name: Include role Patching
+      include_role:
+        name: Patching
+
+    - name: Include role Post-Patching
+      include_role:
+        name: Post-Patching
+    

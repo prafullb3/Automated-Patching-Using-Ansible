@@ -1,0 +1,25 @@
+---
+- name: Setting up the yum repo configuration to the desired state
+  block:
+    - name: Bring the yum repo configuration to the desired state
+      yum_repository:
+        async: "{{ item.async }}"
+        name: "{{ item.name }}"
+        description: "{{ item.description }}" 
+        file: "{{ item.file }}" 
+        baseurl: "{{ item.baseurl }}"
+        gpgcheck: "{{ item.gpgcheck }}"
+        enabled: "{{ item.enabled }}"
+      with_items: "{{ yum_config }}"
+  when: yum_config is defined and yum_config is iterable 
+  rescue:
+    - name: Trigger the notification
+      include_role: 
+        name: post_patching
+        tasks_from: notification.yml
+      vars:
+        mail_subject: "Patching failed during pre patch stage on host: {{ inventory_hostname }}"
+        mail_body: "Error in setting up the yum repo config to desired state, before to perform patching at task: '{{ ansible_failed_task.name}}' for remote machine '{{ ansible_facts['os_family']}}'"
+    - name: Fail the execution as there is an error in setting up yum repo configuration
+      fail:
+        msg: "Error in setting up the yum repo configuration to desired state, before to perform patching at task: '{{ ansible_failed_task.name}}' for remote machine '{{ ansible_facts['os_family']}}' "
