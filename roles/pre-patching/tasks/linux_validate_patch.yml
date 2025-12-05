@@ -1,0 +1,8 @@
+--- 
+- name: RHEL validate patch
+  include_tasks: additional_playbooks/rhel_validate_patch.yml
+  when: (ansible_facts['os_family'] | lower) == 'redhat'
+
+- name:  Ubuntu validate patch
+  include_tasks: additional_playbooks/ubuntu_validate_patch.yml
+  when: (ansible_facts['os_family'] | lower) == 'debian'
