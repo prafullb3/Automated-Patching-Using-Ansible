@@ -1,3 +1,8 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for pre-patching
+evidence_dir: pre_patching
+service_list_evidence_file: service_evidence.txt
+win_required_free_space_percentage: 15
+
+patch_stage_name: pre_patching 

@@ -1,3 +1,83 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # vars file for pre-patching
+linux_temp_dir_name: "{{ansible_env.HOME}}/patching"
+
+yum_config: 
+  - async: no 
+    name: rhel-7-server-rpms
+    description: rhel-7-server-rpms
+    file: repoweb 
+    baseurl: "https://cdn.redhat.com/repos/repo7/rehel-7-server-rpms/"
+    gpgcheck: no
+    enabled: yes 
+  - async: no 
+    name: rhel-7-server-supplementary-rpms
+    description: rhel-7-server-supplementary-rpms
+    file: repoweb 
+    baseurl: "https://cdn.redhat.com/repos/repo7/hel-7-server-supplementary-rpms/"
+    gpgcheck: no
+    enabled: yes 
+  - async: no 
+    name: rhel-7-server-optional-rpms
+    description: rhel-7-server-optional-rpms
+    file: repoweb 
+    baseurl: "https://cdn.redhat.com/repos/repo7/rhel-7-server-optional-rpms/"
+    gpgcheck: no
+    enabled: yes 
+  - async: no 
+    name: rhel-7-server-extras-rpms
+    description: rhel-7-server-extras-rpms
+    file: repoweb 
+    baseurl: "https://cdn.redhat.com/repos/repo7/rhel-7-server-extras-rpms"
+    gpgcheck: no
+    enabled: yes 
+
+####Ubuntu patching related variables
+apt_config:
+  - repo:
+    state:
+    filename:
+
+    
+###Common variables for all Linux flavors(RHEL, CentOS, Ubuntu)
+details_to_capture_linux:
+  - command: "uptime"
+    filename: machine_uptime.txt
+  - command: "systemctl list-units --typeservice --state=running | tail -n +2 | awk '{ print $1 }' | head -n -6"
+    filename: active_services.txt
+  - command: "uname -a"
+    filename: os_details.txt
+  - command: "cat /etc/os-release"
+    filename: os_details.txt 
+  - command: "free -m"
+    filename: memory_info.txt
+  - command: "cat /proc/meminfo"
+    filename: memory_info.txt
+  # - command: "/sbin/multipath -ll 2>&1 || true "
+  #   filename: io_path_info.txt
+  - command: "df -hTP"
+    filename: disk_space_info.txt
+  - command: "cat /etc/fstab"
+    filename: disk_partition_info.txt
+  - command: "lsblk"
+    filename: disk_partition_info.txt
+  - command: "sudo pvs"
+    filename: disk_partition_info.txt
+  - command: "sudo vgs"
+    filename: disk_partition_info.txt
+  - command: "sudo lvs"
+    filename: disk_partition_info.txt
+  - command: "cat /etc/resolv.conf"
+    filename: dns_info.txt 
+  - command: "cat /etc/hosts"
+    filename: dns_info.txt
+  - command: "crontab -1 2>&1 || true "
+    filename: cron_info.txt 
+  - command: cat /etc/chrony.conf | grep -v "#" | sed '/^$/d'
+    filename: chrony_info.txt
+  - command: "nmcli con show"
+    filename: network_connection_info.txt 
+     
+services_info: 
+ - firewalld
