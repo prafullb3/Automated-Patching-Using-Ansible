@@ -1,0 +1,35 @@
+---
+- name: Capture resource details before to start patching for linux
+  block:
+    - name: Run commands to capture output
+      shell: 
+        cmd: "{{ item.command }}"
+      register: command_output
+      with_items: "{{ details_to_capture_linux }}"
+    - name: Write command's output to specified file
+      blockinfile:
+        create: yes 
+        block: | 
+          # Filename: "{{item.item.filename}}"
+          # Date: "{{ansible_date_time.date}}"
+          # Time: "{{ansible_date_time.time}}"
+          # Hostname: "{{inventory_hostname}}"
+          # Command: "{{item.item.command}}"
+          # Output: 
+          {{item.stdout}}
+        path: "{{linux_temp_dir.rstrip('/')}}/{{ evidence_dir }}/{{item.item.filename }}"
+        marker: "\n##### {mark} Evidence for execution of command: '{{item.item.command}}'\n"
+      with_items: "{{command_output.results}}"
+      no_log: true 
+  when: details_to_capture_linux is defined and details_to_capture_linux is iterable 
+  rescue:
+    - name: Trigger notification
+      include_role: 
+        name: post_patching
+        tasks_from: notification.yml
+      vars: 
+        mail_subject: "Patching failed during pre patch stage on host: {{inventory_hostname}}"
+        mail_body: "Error while collecting the evidence before patching at task: '{{ansible_failed_task.name}}' for remote '{{ansible_facts['os_family']}}' machine "
+    - name: Fail the execution of patching if verify resources get failed 
+      fail:
+        msg: "Error while collecting the evidence before patching at task: '{{ansible_failed_task.name}}' for remote '{{ansible_facts['os_family']}}' machine "

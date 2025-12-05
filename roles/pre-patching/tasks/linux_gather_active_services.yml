@@ -1,0 +1,43 @@
+---
+- name: Gather active services for linux  
+  block:
+    - name: Gathering data regarding services. 
+      service_facts:
+      register: service_data 
+    - name: Adding services as suffix at the end of service name 
+      debug:
+        msg: "{{ services_info | map('regex_replace','$','.service') | list }}"
+      register: services_name_final 
+    - block: 
+        - name: Getting services as specified 
+          set_fact:
+            service_list: "{{ service_list | default({}) | combine ({service_data.ansible_facts.services[item].name : service_data.ansible_facts.services[item].state}) }}"
+          loop: "{{ services_name_final.msg }}"
+      rescue:
+        - name: Trigger notification
+          include_role:
+            name: post_patching
+            tasks_from: notification.yml
+          vars:
+            mail_subject: "Patching failed during pre patch stage on host: {{inventory_hostname}}"
+            mail_body: "Services not found. Please check specified services {{ services_name_final.msg }} are present/installed on server."
+        - fail: 
+            msg: "Services not found. Please check specified services {{ services_name_final.msg }} are present. "
+
+
+    - block:
+        - name: Copy data to file 
+          copy: 
+            content: "{{ service_list }}"
+            dest: "{{linux_temp_dir.rstrip('/')}}/{{evidence_dir}}/{{service_list_evidence_file}}"
+      rescue:
+        - name: Trigger notification
+          include_role:
+            name: post_patching
+            tasks_from: notification.yml
+          vars: 
+            mail_subject: "Patching failed during pre patch stage on host: {{inventory_hostname}}"
+            mail_body: "Unable to copy service data to specified path. Please check valid permissions are provided. "
+        - fail:
+            msg: "Unable to copy service data to specified path. Please check valid permissions are provided"
+  when: services_info is defined and services_info is iterable

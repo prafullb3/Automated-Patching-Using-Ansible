@@ -6,14 +6,6 @@
         repo: "{{ item.repo }}"
         state: "{{ item.state }}"
         filename: "{{ item.filename }}"
-      #   async: "{{ item.async }}"
-      #   name: "{{ item.name }}"
-      #   description: "{{ item.description }}" 
-      #   file: "{{ item.file }}" 
-      #   baseurl: "{{ item.baseurl }}"
-      #   gpgcheck: "{{ item.gpgcheck }}"
-      #   enabled: "{{ item.enabled }}"
-      # with_items: "{{ yum_config }}"
   when: apt_config is defined and apt_config is iterable 
   rescue:
     - name: Trigger the notification
