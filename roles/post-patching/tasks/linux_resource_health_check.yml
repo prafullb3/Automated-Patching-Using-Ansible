@@ -1,0 +1,16 @@
+---
+- name: Resource health check
+  block:  
+    - name: Resource health check for linux
+      include_role:
+        name: pre-patching
+        tasks_from: linux_verify_resources.yml
+      vars:
+        evidence_dir: "{{patch_dir}}"
+
+    - name: Gather evidences for linux 
+      include_role: 
+        name: pre-patching
+        tasks_from: linux_gather_evidences.yml
+      vars:
+        evidence_dir: "{{patch_dir}}"

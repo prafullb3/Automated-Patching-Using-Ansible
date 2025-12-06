@@ -1,3 +1,18 @@
-#SPDX-License-Identifier: MIT-0
----
-# vars file for post-patching
+report_dit_at: /tmp/
+
+send_email: false
+smtp_host:
+smtp_port:
+sender_mail_id:
+receiever_mail_id:
+mail_subject:
+mail_body:
+mail_secure: "never"
+smtp_username:
+smtp_password:
+
+
+perform_cleanup: false
+temp_dir_at: /tmp
+
+linux_temp_dir_name: "{{ansible_env.HOME}}/patching"

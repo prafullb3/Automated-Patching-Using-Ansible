@@ -1,0 +1,37 @@
+---
+- block:
+    - name: Create a zip of evidences gathered on target host
+      archive:
+        path: "{{ linux_temp_dir.rstrip('/') }}"
+        dest: "{{ linux_temp_dir.rstrip('/') }}.zip "
+        format: zip 
+
+    - name: Copy evidence from target linux node to control node 
+      fetch:
+        src: "{{ linux_temp_dir.rstrip('/') }}.zip "
+        dest: "{{ report_dit_at }}/evidence.zip"
+        flat: true
+    - name: "Check if service report specific file 'services_not_restarted_after_patch_report.txt' already exists on {{temp_dir_at}}"
+      stat: 
+        path: "{{ temp_dir_at }}/services_not_restarted_after_patch_report.txt"
+      register: services_not_restarted_after_patch_report 
+      delegate_to: localhost
+    - set_fact:
+        evidence_to_share: 
+          - "{{ report_dit_at }}/evidence.zip"
+
+    - set_fact:
+        evidence_to_share: "{{ evidence_to_share + [temp_dir_at ~ '/services_not_restarted_after_patch_report.txt'] }}"
+      when: services_not_restarted_after_patch_report.stat.exists
+
+    - name: Archive all the collected evidences together 
+      archive:
+        path: "{{ evidence_to_share }}"
+        dest: "{{ report_dit_at }}/consolidated_evidences.zip"
+        remove: true
+        format: zip
+      delegate_to: localhost
+  rescue:
+    - name: Failed to collect evidence at control node 
+      fail: 
+        msg: "Failed to collect evidences from host {{ inventory_hostname }} on control node. "

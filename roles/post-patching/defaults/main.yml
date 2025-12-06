@@ -1,3 +1,8 @@
-#SPDX-License-Identifier: MIT-0
----
-# defaults file for post-patching
+# defaults file for post_patching
+patch_dir: post_patching
+evidence_dir: pre_patching
+# perform_cleanup: false 
+# send_email: false
+
+patch_stage_name: post_patching
+service_list_evidence_file: service_evidence.txt
