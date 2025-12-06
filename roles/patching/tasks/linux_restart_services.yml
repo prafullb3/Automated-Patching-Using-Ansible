@@ -1,0 +1,27 @@
+---
+- block:
+    - name: Restart services. 
+      systemd: 
+        name: "{{item}}"
+        state: started
+      ignore_errors: true
+      with_items: "{{linux_services_to_restart}}"
+  rescue:
+    - set_fact:
+        start_service_error_data: "{{start_service_error_data | default([])| combine({ansible_failed_result.results[indx].msg:''}) }}"
+      loop: "{{ ansible_failed_result.results[:]}}"
+      loop_control:
+        index_var: indx
+
+    - name: Trigger notification
+      include_role:
+        name: post_patching
+        tasks_from: notification.yml
+      vars:
+        mail_subject: "Patching failed during patch stage on host: {{ inventory_hostname }}"
+        mail_body: "Error while restarting the specified services, please check if specified services {{linux_services_to_restart}} are present/installed on server"
+    - name: "Failed to start services" 
+      fail:
+        msg: "{{start_service_error_data.keys()}}" 
+
+  when: linux_services_to_restart is defined and linux_services_to_restart is iterable

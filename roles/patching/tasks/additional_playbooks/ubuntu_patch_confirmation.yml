@@ -1,0 +1,19 @@
+---
+- name: Patch confirmation
+  block:
+    - name: "Generate time stamp for file"
+      set_fact:
+        time_stamp: "{{ '%d %b %Y' | strftime(ansible_date_time.epoch) }}"
+        time_stamp_snapshot: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}"
+    - name: Get list of installed packages from apt
+      shell: dpkg-query --show --showformat='${Package} ${Version}\n' | sort > "{{linux_temp_dir.rstrip('/')}}/{{ linux_patch_dir }}/{{ ansible_distribution }}_all_installed_packages_till_{{ time_stamp_snapshot }}.txt"
+  rescue:
+    - name: Trigger notification
+      include_role:
+        name: post_patching
+        tasks_from: notification.yml
+      vars:
+        mail_subject: "Patching failed during patch stage on host: {{ inventory_hostname }}"
+        mail_body: "Failed to confirm Ubuntu patch"
+    - fail:
+        msg: "Failed to confirm Ubuntu patch"

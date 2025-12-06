@@ -1,0 +1,7 @@
+- name: Patch confirmation for Redhat family
+  include_tasks: additional_playbooks/redhat_patch_confirmation.yml
+  when: (ansible_facts['os_family'] | lower) == 'redhat'
+
+- name: Patch confirmation for Ubuntu
+  include_tasks: additional_playbooks/ubuntu_patch_confirmation.yml
+  when: (ansible_facts['os_family'] | lower) == 'debian'
