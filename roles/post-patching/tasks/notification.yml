@@ -1,0 +1,22 @@
+- name: Send email
+  block:
+    - name: Send email notification with patching report 
+      mail:
+        host: "{{ smtp_host }}"
+        port: "{{ smtp_port }}"
+        sender: "{{ sender_mail_id }}"
+        to: "{{ receiever_mail_id }}"
+        subject: "{{ mail_subject }}"
+        body: "{{ mail_body }}"
+        attach: "{{report_dit_at}}/consolidated_evidences.zip"
+        secure: "{{ mail_secure }}"
+        username: "{{ smtp_username }}"
+        password: "{{ smtp_password }}"
+      no_log: true
+      delegate_to: localhost
+
+  rescue:
+    - name: Failed to send notification
+      fail:
+        msg: "Error while sending notification email: '{{ ansible_failed_task.name}}' for remote '{{ ansible_facts['os_family']}}' machine "
+  when: send_email

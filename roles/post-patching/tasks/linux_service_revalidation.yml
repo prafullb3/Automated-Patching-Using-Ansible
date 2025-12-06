@@ -1,0 +1,12 @@
+- name: Linux service revalidation
+  block:  
+    - name: Setup post patching temp directories
+      file: 
+        path: "{{ linux_temp_dir }}/{{ patch_dir }}"
+        state: directory
+    - name: Checking for service revalidation for patching
+      include_role:
+        name: pre-patching
+        tasks_from: linux_gather_active_services.yml
+      vars:
+        evidence_dir: "{{ patch_dir }}"

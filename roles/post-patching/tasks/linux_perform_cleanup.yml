@@ -1,0 +1,31 @@
+---
+- name: Perform cleanup for linux
+  block:
+    - name: delete all the files and folders
+      ansible.builtin.find:
+        paths: "{{ linux_temp_dir.rstrip('/') }}"
+        patterns: "*patching*"
+        file_type: any
+      register: found_patching_files
+
+    - ansible.builtin.debug:
+        var: found_patching_files
+
+    - name: Delete found items
+      file:
+        path: "{{item.path}}"
+        state: absent
+      with_items: "{{found_patching_files.files}}"
+    # - name: Remove temp directory from linux machine
+    #   file:
+    #     state: absent
+    #     path: "{{ linux_temp_dir.rstrip('/') }}"
+    # - name: Remove zip files from linux machine 
+    #   file:
+    #     state: absent 
+    #     path: "{{ linux_temp_dir.rstrip('/') }}.zip"
+  when: perform_cleanup
+  rescue:
+    - name: Failed to perform cleanup
+      fail:
+        msg: "Failed to perform cleanup on path: '{{ansible_failed_task.name}}' for remote '{{ansible_facts.['os_family']}}' machine"

@@ -1,0 +1,21 @@
+---
+- name: "Generate a report that contains a list services along with their hostname which are not started after patching"
+  block:
+    - name: Combine available service diff files to generate 'services_not_started_after_patch_report.txt'
+      shell:
+        cmd: 'sudo find ./ -type f -name "services_not_started_after_patch_on_*" | xargs tail -n +1 > services_not_started_after_patch_report.txt'
+        chdir: "{{temp_dir_at}}"
+      delegate_to: localhost
+
+  rescue:
+    - name: Trigger notification
+      include_role:
+        name: post-patching
+        tasks_from: notification.yml
+      vars:
+        mail_body: "Failed to consolidate service diff files into one report"
+        mail_subject: "Failed to generate report for services not after patch"
+
+    - name: Failed to generate report
+      fail:
+        msg: "Failed to consolidate service diff files into one report, at task: {{ansible_failed_task.name}}"

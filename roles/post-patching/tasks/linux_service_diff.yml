@@ -1,0 +1,57 @@
+---
+- name: "Check existance of {{ linux_temp_dir}}/{{evidence_dir}}/{{service_list_evidence_file}} file on target machine"
+  stat: 
+    path: "{{linux_temp_dir}}/{{evidence_dir}}/{{service_list_evidence_file}}"
+  register: pre_patch_service_file
+- name: "Check existance of {{ linux_temp_dir}}/{{patch_dir}}/{{service_list_evidence_file}} file on target machine"
+  stat: 
+    path: "{{linux_temp_dir}}/{{patch_dir}}/{{service_list_evidence_file}}"
+  register: post_patch_service_file
+- name: "Find out the services which does not get started after patch on target vm named {{inventory_hostname}}"
+  block:
+    - name: Read the list of active services specific file which was collected before patch 
+      shell: |
+        cat {{linux_temp_dir}}/{{evidence_dir}}/{{service_list_evidence_file}} | tail -n +10
+      register: pre_patch_services
+    - name: Read the list of active services specific file which was collected after patch
+      shell: |
+        cat {{linux_temp_dir}}/{{patch_dir}}/{{service_list_evidence_file}} | tail -n +10
+      register: post_patch_services
+    - name: Find service diff 
+      set_fact:
+        service_diff: "{{ pre_patch_services.stdout_lines | difference(post_patch_services.stdout_lines) | replace('.service','') }}"
+    - name: Compare running service list before and after patch to find the diff 
+      copy: 
+        content: "{{service_diff | map('join') | list | join('\n')}}"
+        dest: "{{linux_temp_dir}}/{{patch_dir}}/services_not_restarted_after_patch_on_{{inventory_hostname | replace('.','_') | replace('-','_') }}.txt"
+        mode: '644'
+    - name: Fetch the service diff file from target node to ansible control node 
+      fetch:
+        src: "{{linux_temp_dir}}/{{patch_dir}}/services_not_restarted_after_patch_on_{{inventory_hostname | replace('.','_') | replace('-','_') }}.txt"
+        dest: "{{report_dit_at}}/"
+        flat: true
+  when: pre_patch_service_file.stat.exists and post_patch_service_file.stat.exists
+  rescue:
+    - name: Trigger notification
+      include_role:
+        name: post-patching
+        tasks_from: notification.yml
+      vars:
+        mail_subject: "Failed to find services which are not restarted after patchig on host: {{ inventory_hostname }}"
+        mail_body: "Failed to run task: '{{ansible_failed_task.name}}'"
+
+    - name: Display failure message with failure 
+      fail:
+        msg: "Failed to find services which are not restarted after patching on host: {{inventory_hostname}}"
+
+
+
+
+
+
+
+
+
+
+
+
