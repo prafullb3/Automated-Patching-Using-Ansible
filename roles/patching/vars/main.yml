@@ -1,3 +1,10 @@
-#SPDX-License-Identifier: MIT-0
----
-# vars file for patching
+linux_temp_dir_name: "{{ansible_env.HOME}}/patching" 
+
+
+machine_reboot: false
+yum_update: true 
+exclude_packges: []
+yum_only_install_security_patch: true
+
+linux_services_to_restart: 
+  - firewalld

@@ -1,3 +1,21 @@
-#SPDX-License-Identifier: MIT-0
----
 # tasks file for patching
+
+- name: Stop services
+  include_tasks: linux_stop_services.yml
+
+- name: Patch installation
+  include_tasks: linux_patch_installation.yml
+
+- name: Patch confirmation
+  include_tasks: linux_patch_confirmation.yml
+
+- name: Start services
+  include_tasks: linux_restart_services.yml
+
+- name: Gather Evidence
+  include_role:
+    name: pre-patching
+    tasks_from: linux_gather_evidences.yml
+  vars:
+    patch_stage_name: "{{linux_patch_dir}}"
+    evidence_dir: "{{linux_patch_dir}}"

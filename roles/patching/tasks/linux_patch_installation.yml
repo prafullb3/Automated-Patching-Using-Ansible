@@ -1,0 +1,6 @@
+- name: Patch installation for Redhat 
+  include_tasks: additional_playbooks/redhat_patch_installation.yml
+  when: (ansible_facts['os_family'] | lower) == 'redhat'
+- name: Patch installation for Ubuntu
+  include_tasks: additional_playbooks/ubuntu_patch_installation.yml
+  when: (ansible_facts['os_family'] | lower) == 'debian'

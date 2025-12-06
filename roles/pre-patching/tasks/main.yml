@@ -2,17 +2,16 @@
 ---
 # tasks file for pre-patching
 - name: Create temp directory
-  include_tasks: create_temp_dir.yml
+  include_tasks: linux_create_temp_dir.yml
 
 - name:  Validate patch 
   include_tasks: linux_validate_patch.yml
-  #when: (ansible_facts['os_family'] | lower) != 'windows' and (ansible_facts['distribution'] | lower) == 'redhat'
 
 - name: Verify resources
-  include_tasks: verify_resources.yml
+  include_tasks: linux_verify_resources.yml
 
 - name: Gather active services
-  include_tasks: gather_active_services.yml
+  include_tasks: linux_gather_active_services.yml
 
 - name: Gather Evidences
-  include_tasks: gather_evidences.yml
+  include_tasks: linux_gather_evidences.yml
