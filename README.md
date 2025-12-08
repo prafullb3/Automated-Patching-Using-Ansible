@@ -2,23 +2,19 @@
 
 ## Introduction
 
-The patching framework is designed to facilitate a seamless patching process with three distinct stages: pre-patch, patch, and post-patch. Each stage is further divided into specific substages to ensure a comprehensive and efficient patching operation. This patching framework supports windows and Linux flavors(RHEL, CentOS and Ubuntu)
+The patching framework is designed to facilitate a seamless patching process with three distinct stages: pre-patch, patch, and post-patch. Each stage is further divided into specific substages to ensure a comprehensive and efficient patching operation. This patching framework supports Linux flavors(RHEL, CentOS and Ubuntu)
 
 ## Requirements
 
 1. **SMTP Configuration for Email Notifications:**
    For receiving notifications via email, you need to provide SMTP configuration details. Make sure you have the required information such as SMTP server address, port, and authentication credentials. These details will be used to enable seamless email notifications.
 
-2. **Nutanix Portal credentials**
-   To take the snapshot of the server on Nutanix portal, you should have credentials of Nutanix portal along with necessary permissions.
-
-3. **Required credentials**
+2. **Required credentials**
    1. Machine credentials: Credentials of the server on which patching needs to be performed
-   2. Nuranix Element and Prism central IP: Nutanix Prism central and Element credentials
 
 ## Variables
 
-Below are the manadatory variables for Windows and Linux(RHEL, CentOS, and Ubuntu) to run this automation:
+Below are the manadatory variables for Linux(RHEL, CentOS, and Ubuntu) to run this automation:
 
 |Variable Name | variable type | Supported OS | Description | Default Value |
 |--------------|---------------|--------------|-------------|----------------|
@@ -32,7 +28,6 @@ Below are the manadatory variables for Windows and Linux(RHEL, CentOS, and Ubunt
 |exclude_packges|List | RHEL, CentOS | List of packages which needs to be excluded | ""|
 |yum_only_install_security_patch| Boolean|RHEL, CentOS| Flag to update only security updates|`true`|
 |machine_reboot| Boolean| Linux |Flag to reboot the server| `false`|
-|details_to_capture_windows:</br>&nbsp;&nbsp;- command:</br>&nbsp;&nbsp;&nbsp;&nbsp;filename: | Dictionary| Windows | Commands to verify the the resources of server, for example available space, current os version| ""
 |send_email|Boolean| * | Flag to send the notification via mail| `False`|
 |smtp_host| String | * | The mail server | ""|
 |smtp_port| Integer | * | The mail server port| ""|
