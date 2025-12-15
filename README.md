@@ -4,14 +4,25 @@
 
 The patching framework is designed to facilitate a seamless patching process with three distinct stages: pre-patch, patch, and post-patch. Each stage is further divided into specific substages to ensure a comprehensive and efficient patching operation. This patching framework supports Linux flavors(RHEL, CentOS and Ubuntu)
 
+## Problem Statement
+
+Managing patches across large or diverse Linux fleets is error-prone and time-consuming without a standardized, automated approach. This repository provides an Ansible-based framework to perform pre-patch validation, staged patch installation, service management, and post-patch evidence collection and reporting. It is suitable for scheduled maintenance windows, emergency security rollouts, compliance-driven patching, and integration with Ansible Tower/AWX to automate patching at scale for RHEL, CentOS, and Ubuntu systems.
+
 ## Requirements
 
-1. **SMTP Configuration for Email Notifications:**
-   For receiving notifications via email, you need to provide SMTP configuration details. Make sure you have the required information such as SMTP server address, port, and authentication credentials. These details will be used to enable seamless email notifications.
+- **Supported targets:** RHEL, CentOS and Ubuntu-based systems (ensure target package managers like `yum`/`dnf`/`apt` are available and reachable).
+- **Control node:** Ansible (2.9+), and Python 3.8+ installed on the machine from which you run the playbooks.
+- **Managed nodes (targets):** SSH access enabled; Python 3.x available (set `ansible_python_interpreter` if needed); user with `sudo` or root privileges for package operations and reboots.
+- **Credentials:** Machine credentials (SSH private key or username/password), optional `become`/`become_password` if privilege escalation requires it. If using Ansible Tower/AWX, supply Git and machine credentials in Tower.
+- **Network & Repositories:** Target hosts must have access to package repositories (internet or internal mirrors) and any internal services required (e.g., SMTP server for email notification).
+- **SMTP (optional):** If you enable email notifications, provide SMTP host, port, username/password, and encryption settings as variables.
+- **Ansible collections & roles:** Install required collections from `collections/requirements.yml` before running the playbook:
 
-2. **Required credentials**
-   1. Machine credentials: Credentials of the server on which patching needs to be performed
+```bash
+ansible-galaxy collection install -r collections/requirements.yml
+```
 
+- **Optional:** Ansible Tower/AWX for scheduling, templating, and RBAC if you want to run this at scale from a centralized UI.
 ## Variables
 
 Below are the manadatory variables for Linux(RHEL, CentOS, and Ubuntu) to run this automation:
